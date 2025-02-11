@@ -116,7 +116,7 @@ class GcloudStorageService(config: StorageConfig) extends BaseStorageService  {
     val expiryTime = if(ttl.get > maxSignedurlTTL) maxSignedurlTTL else ttl.get
     //creating signed url
     val url = storage.signUrl(blobInfo, expiryTime, TimeUnit.SECONDS, Storage.SignUrlOption.httpMethod(HttpMethod.PUT),
-      Storage.SignUrlOption.withExtHeaders(extensionHeaders.asJava),
+//      Storage.SignUrlOption.withExtHeaders(extensionHeaders.asJava),
       Storage.SignUrlOption.withV4Signature);
     url.toString;
   }
