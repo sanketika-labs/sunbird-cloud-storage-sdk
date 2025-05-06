@@ -80,14 +80,9 @@ class GcloudStorageService(config: StorageConfig) extends BaseStorageService  {
     val blob = getObject(container, prefix, Option(false))
     val uri = blob.metadata.get("publicUri")
     if (!uri.isEmpty) {
-      if(isDirectory.get){
-        throw new StorageServiceException("getUri for directory is not supported for GCP. The given _prefix is incorrect: " + _prefix)
-      }
-      else{
-        val host = "https://storage.googleapis.com/"
-        val name = blob.metadata.get("name").get.asInstanceOf[String]
-        host + container + "/" + name
-      }
+      val host = "https://storage.googleapis.com/"
+      val name = blob.metadata.get("name").get.asInstanceOf[String]
+      host + container + "/" + name
     } else
       throw new StorageServiceException("uri not available for the given prefix: "+ _prefix)
   }
