@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.sunbird</groupId>
     <artifactId>cloud-store-sdk_2.12</artifactId>
-    <version>1.4.7.1</version>
+    <version>1.4.7.2</version>
     <packaging>jar</packaging>
     <name>Cloud Store SDK</name>
     <description>cloud-store-sdk provides client APIs to handle cloud store (AWS S3, Azure Blobstore, GCP, OCI).</description>
@@ -31,15 +31,15 @@
     </developer>
   </developers>
     <distributionManagement>
-  		<snapshotRepository>
-    		<id>ossrh</id>
-    		<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-  		</snapshotRepository>
-  		<repository>
-    		<id>ossrh</id>
-    		<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-  		</repository>
-	</distributionManagement>
+        <snapshotRepository>
+            <id>central</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>central</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 	<scm>
     	<connection>scm:git:git://github.com/project-sunbird/sunbird-cloud-storage-sdk.git</connection>
     	<developerConnection>scm:git:ssh://github.com/project-sunbird/sunbird-cloud-storage-sdk.git</developerConnection>
@@ -287,16 +287,14 @@
       			</executions>
     		</plugin>
 			<plugin>
-		      	<groupId>org.sonatype.plugins</groupId>
-		      	<artifactId>nexus-staging-maven-plugin</artifactId>
-		      	<version>1.6.7</version>
-		      	<extensions>true</extensions>
-		      	<configuration>
-		        	<serverId>ossrh</serverId>
-		        	<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-		        	<!-- <autoReleaseAfterClose>true</autoReleaseAfterClose> -->
-		      	</configuration>
-		    </plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.7.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<publishingServerId>central</publishingServerId>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
