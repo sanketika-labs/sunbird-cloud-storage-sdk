@@ -97,22 +97,40 @@ class GcloudStorageService(config: StorageConfig) extends BaseStorageService  {
       throw new StorageServiceException("Missing google credentials params.")
     }
     val properties = additionalParams.get;
+    // extract optional flag to indicate resumable/chunked upload, defaulting to false
+    val isChunkedUpload: Boolean = properties.get("chunked").map(_.toLowerCase).contains("true")
     // getting credentials
     val credentials = ServiceAccountCredentials.fromPkcs8(properties.get("clientId").get, properties.get("clientEmail").get, properties.get("privateKeyPkcs8").get,
     properties.get("privateKeyIds").get, new java.util.ArrayList[String]())
     // creating storage options
     val storage = StorageOptions.newBuilder.setProjectId(properties.get("projectId").get).setCredentials(credentials).build.getService
-    // setting header as application/octet-stream (required by google)
-    val extensionHeaders = Map(HttpHeaders.CONTENT_TYPE -> contentType.getOrElse(MimeTypes.OCTET_STREAM))
     // creating blob info
     val blobInfo = BlobInfo.newBuilder(BlobId.of(container, objectKey)).build
     // expiry time validation as TTL cannot be greater than 604800
     // expiry time will be set to default value of 604800 if greater than 604800
     val expiryTime = if(ttl.get > maxSignedurlTTL) maxSignedurlTTL else ttl.get
     //creating signed url
-    val url = storage.signUrl(blobInfo, expiryTime, TimeUnit.SECONDS, Storage.SignUrlOption.httpMethod(HttpMethod.PUT),
-//      Storage.SignUrlOption.withExtHeaders(extensionHeaders.asJava),
-      Storage.SignUrlOption.withV4Signature);
+    val url = if (isChunkedUpload) {
+      // Only for chunked uploads, use resumable POST and include required headers
+      val extensionHeaders = Map(HttpHeaders.CONTENT_TYPE -> contentType.getOrElse(MimeTypes.OCTET_STREAM), "x-goog-resumable" -> "start")
+      storage.signUrl(
+        blobInfo,
+        expiryTime,
+        TimeUnit.SECONDS,
+        Storage.SignUrlOption.httpMethod(HttpMethod.POST),
+        Storage.SignUrlOption.withV4Signature,
+        Storage.SignUrlOption.withExtHeaders(extensionHeaders.asJava)
+      )
+    } else {
+      // Original behavior: simple PUT without extra headers
+      storage.signUrl(
+        blobInfo,
+        expiryTime,
+        TimeUnit.SECONDS,
+        Storage.SignUrlOption.httpMethod(HttpMethod.PUT),
+        Storage.SignUrlOption.withV4Signature
+      )
+    }
     url.toString;
   }
 
